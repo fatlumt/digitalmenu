@@ -1,0 +1,21 @@
+{
+  "name": "digitalmenu",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "pnpm --filter @digitalmenu/api dev",
+    "dev:web": "pnpm --filter @digitalmenu/web dev",
+    "dev:mobile": "pnpm --filter @digitalmenu/mobile start",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
