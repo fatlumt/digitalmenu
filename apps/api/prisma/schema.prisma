@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  STAFF
+}
+
+enum PublishState {
+  DRAFT
+  PUBLISHED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  role         Role           @default(OWNER)
+  restaurants  Restaurant[]
+  refreshToken RefreshToken[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Restaurant {
+  id          String        @id @default(cuid())
+  ownerId     String
+  owner       User          @relation(fields: [ownerId], references: [id])
+  name        String
+  slug        String        @unique
+  logoUrl     String?
+  address     String
+  phone       String
+  currency    String
+  languages   String[]
+  socialLinks Json?
+  publish     PublishState  @default(DRAFT)
+  menus       Menu[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+}
+
+model Menu {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  description  String?
+  categories   Category[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+}
+
+model Category {
+  id        String  @id @default(cuid())
+  menuId    String
+  menu      Menu    @relation(fields: [menuId], references: [id])
+  name      String
+  desc      String?
+  sortOrder Int     @default(0)
+  items     Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Item {
+  id          String        @id @default(cuid())
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  tags        String[]
+  allergens   String[]
+  isSpicy     Boolean       @default(false)
+  isVegan     Boolean       @default(false)
+  available   Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  optionGroups OptionGroup[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+}
+
+model OptionGroup {
+  id            String   @id @default(cuid())
+  itemId        String
+  item          Item     @relation(fields: [itemId], references: [id])
+  name          String
+  minSelectable Int      @default(0)
+  maxSelectable Int      @default(1)
+  options       Option[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+}
+
+model Option {
+  id          String      @id @default(cuid())
+  optionGroupId String
+  optionGroup OptionGroup @relation(fields: [optionGroupId], references: [id])
+  name        String
+  priceDelta  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
